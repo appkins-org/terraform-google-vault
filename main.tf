@@ -119,7 +119,11 @@ resource "google_cloud_run_service" "default" {
         }
 
         startup_probe {
-          http_get {
+          period_seconds    = 240
+          timeout_seconds   = 240
+          failure_threshold = 3
+
+          tcp_socket {
             port = 8200
           }
         }

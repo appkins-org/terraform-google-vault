@@ -55,10 +55,6 @@ resource "google_cloud_run_service" "default" {
 
   metadata {
     namespace = var.project
-
-    annotations = {
-      "run.googleapis.com/launch-stage" = "BETA"
-    }
   }
 
   template {

@@ -1,37 +1,3 @@
-locals {
-  vault_config = jsonencode(
-    {
-      plugin_directory = "/vault/plugins"
-      storage = {
-        gcs = {
-          bucket     = local.vault_storage_bucket_name
-          ha_enabled = "false"
-        }
-      }
-      seal = {
-        gcpckms = {
-          project    = var.project,
-          region     = var.location,
-          key_ring   = local.vault_kms_keyring_name,
-          crypto_key = google_kms_crypto_key.vault.name
-        }
-      }
-      default_lease_ttl = "168h",
-      max_lease_ttl     = "720h",
-      disable_mlock     = "true",
-      listener = {
-        tcp = {
-          address     = "0.0.0.0:8080",
-          tls_disable = "1"
-        }
-      }
-      ui = var.vault_ui
-    }
-  )
-  vault_kms_keyring_name    = var.vault_kms_keyring_name != "" ? var.vault_kms_keyring_name : "${var.name}-${lower(random_id.vault.hex)}-kr"
-  vault_storage_bucket_name = var.vault_storage_bucket_name != "" ? var.vault_storage_bucket_name : "${var.name}-${lower(random_id.vault.hex)}-bucket"
-}
-
 resource "random_id" "vault" {
   byte_length = 2
 }
@@ -109,9 +75,22 @@ resource "google_cloud_run_service" "default" {
       container_concurrency = var.container_concurrency
       containers {
         # Specifying args seems to require the command / entrypoint
-        image   = "${var.vault_image}:${var.vault_version}"
-        command = ["/usr/local/bin/docker-entrypoint.sh"]
-        args    = ["server"]
+        image = "${var.vault_image}:${var.vault_version}"
+
+        command = [
+          "/bin/sh",
+          "-c"
+        ]
+
+        args = [
+          join(" && ", [
+            "wget https://github.com/1Password/vault-plugin-secrets-onepassword/releases/download/v1.1.0/vault-plugin-secrets-onepassword_1.1.0_darwin_amd64.zip -O /tmp/vault.zip",
+            "unzip -d /tmp /tmp/vault.zip",
+            "mv /tmp/vault-plugin-secrets-onepassword_v1.1.0 ${var.plugin_path}/onepassword",
+            "chmod +x ${var.plugin_path}/onepassword",
+            "/usr/local/bin/docker-entrypoint.sh server"
+          ])
+        ]
 
         ports {
           name           = "h2c"
@@ -150,44 +129,6 @@ resource "google_cloud_run_service" "default" {
             memory = "256Mi"
           }
           requests = {}
-        }
-
-        volume_mounts {
-          name       = "plugins"
-          mount_path = var.plugin_path
-        }
-      }
-
-      containers {
-        name  = "plugin-downloader"
-        image = "alpine"
-
-        command = [
-          "/bin/sh",
-          "-c"
-        ]
-
-        args = [
-          join(" && ", [
-            "wget https://github.com/1Password/vault-plugin-secrets-onepassword/releases/download/v1.1.0/vault-plugin-secrets-onepassword_1.1.0_darwin_amd64.zip -O /tmp/vault.zip",
-            "unzip -d /tmp /tmp/vault.zip",
-            "mv /tmp/vault-plugin-secrets-onepassword_v1.1.0 ${var.plugin_path}/onepassword",
-            "chmod +x ${var.plugin_path}/onepassword"
-          ])
-        ]
-
-        volume_mounts {
-          name       = "plugins"
-          mount_path = var.plugin_path
-        }
-      }
-
-      volumes {
-        name = "plugins"
-
-        empty_dir {
-          medium     = "Memory"
-          size_limit = "128Mi"
         }
       }
     }

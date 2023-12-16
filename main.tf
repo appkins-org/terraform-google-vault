@@ -93,22 +93,6 @@ resource "google_cloud_run_service" "default" {
           ])
         ]
 
-        ports {
-          name           = "h2c"
-          container_port = 8080
-        }
-
-        startup_probe {
-          period_seconds        = 240
-          timeout_seconds       = 240
-          failure_threshold     = 3
-          initial_delay_seconds = 15
-
-          tcp_socket {
-            port = 8080
-          }
-        }
-
         env {
           name  = "SKIP_SETCAP"
           value = "true"

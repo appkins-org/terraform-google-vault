@@ -16,9 +16,15 @@ variable "project" {
 }
 
 variable "vault_image" {
-  description = "Vault docker image (i.e.hashicorp/vault:1.6.1 -- Now supports docker hub directly."
+  description = "Vault docker image (i.e. hashicorp/vault."
   type        = string
-  default     = "hashicorp/vault:1.6.1"
+  default     = "hashicorp/vault"
+}
+
+variable "vault_version" {
+  description = "Vault version to use."
+  type        = string
+  default     = "1.7.2"
 }
 
 variable "bucket_force_destroy" {

@@ -109,9 +109,20 @@ resource "google_cloud_run_service" "default" {
       container_concurrency = var.container_concurrency
       containers {
         # Specifying args seems to require the command / entrypoint
-        image   = var.vault_image
+        image   = "${var.vault_image}:${var.vault_version}"
         command = ["/usr/local/bin/docker-entrypoint.sh"]
         args    = ["server"]
+
+        ports {
+          name           = "h2c"
+          container_port = 8200
+        }
+
+        startup_probe {
+          http_get {
+            port = 8200
+          }
+        }
 
         env {
           name  = "SKIP_SETCAP"

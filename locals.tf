@@ -1,7 +1,7 @@
 locals {
   vault_config = jsonencode(
     {
-      plugin_directory = "/vault/plugins"
+      plugin_directory = var.plugin_directory
       storage = {
         gcs = {
           bucket     = local.vault_storage_bucket_name

@@ -55,6 +55,10 @@ resource "google_cloud_run_service" "default" {
 
   metadata {
     namespace = var.project
+
+    annotations = {
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
   }
 
   template {
@@ -80,11 +84,11 @@ resource "google_cloud_run_service" "default" {
 
         args = [
           join(" && ", [
-            "mkdir -p ${var.plugin_path}",
+            "mkdir -p ${var.plugin_directory}",
             "wget https://github.com/1Password/vault-plugin-secrets-onepassword/releases/download/v1.1.0/vault-plugin-secrets-onepassword_1.1.0_darwin_amd64.zip -O /tmp/vault.zip",
             "unzip -d /tmp /tmp/vault.zip",
-            "mv /tmp/vault-plugin-secrets-onepassword_v1.1.0 ${var.plugin_path}/onepassword",
-            "chmod +x ${var.plugin_path}/onepassword",
+            "mv /tmp/vault-plugin-secrets-onepassword_v1.1.0 ${var.plugin_directory}/onepassword",
+            "chmod +x ${var.plugin_directory}/onepassword",
             "/usr/local/bin/docker-entrypoint.sh server"
           ])
         ]
@@ -121,6 +125,20 @@ resource "google_cloud_run_service" "default" {
             memory = "256Mi"
           }
           requests = {}
+        }
+
+        volume_mounts {
+          name       = "plugins"
+          mount_path = var.plugin_directory
+        }
+      }
+
+      volumes {
+        name = "plugins"
+
+        empty_dir {
+          medium     = "Memory"
+          size_limit = "32Mi"
         }
       }
     }

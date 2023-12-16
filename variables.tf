@@ -93,8 +93,8 @@ variable "vault_storage_bucket_name" {
   default     = ""
 }
 
-variable "plugin_path" {
+variable "plugin_directory" {
   description = "Path to the plugin directory. This is where the vault plugins are stored."
   type        = string
-  default     = "/vault/plugins"
+  default     = "/usr/local/libexec/vault"
 }

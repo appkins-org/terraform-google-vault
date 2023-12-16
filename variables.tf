@@ -92,3 +92,9 @@ variable "vault_storage_bucket_name" {
   type        = string
   default     = ""
 }
+
+variable "plugin_path" {
+  description = "Path to the plugin directory. This is where the vault plugins are stored."
+  type        = string
+  default     = "/vault/plugins"
+}

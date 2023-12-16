@@ -153,7 +153,7 @@ resource "google_cloud_run_service" "default" {
 
         volume_mounts {
           name       = "plugins"
-          mount_path = "/vault/plugins"
+          mount_path = var.plugin_path
         }
       }
 
@@ -170,14 +170,14 @@ resource "google_cloud_run_service" "default" {
           join(" && ", [
             "wget https://github.com/1Password/vault-plugin-secrets-onepassword/releases/download/v1.1.0/vault-plugin-secrets-onepassword_1.1.0_darwin_amd64.zip -O /tmp/vault.zip",
             "unzip -d /tmp /tmp/vault.zip",
-            "mv /tmp/vault-plugin-secrets-onepassword_v1.1.0 /vault/plugins/onepassword",
-            "chmod +x /vault/plugins/onepassword"
+            "mv /tmp/vault-plugin-secrets-onepassword_v1.1.0 ${var.plugin_path}/onepassword",
+            "chmod +x ${var.plugin_path}/onepassword"
           ])
         ]
 
         volume_mounts {
           name       = "plugins"
-          mount_path = "/vault/plugins"
+          mount_path = var.plugin_path
         }
       }
 

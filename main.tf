@@ -108,6 +108,11 @@ resource "google_cloud_run_service" "default" {
           value = var.vault_api_addr
         }
 
+        ports {
+          name           = "http1"
+          container_port = 8080
+        }
+
         startup_probe {
           period_seconds        = 240
           timeout_seconds       = 240

@@ -115,7 +115,7 @@ resource "google_cloud_run_service" "default" {
 
         ports {
           name           = "h2c"
-          container_port = 8200
+          container_port = 8080
         }
 
         startup_probe {
@@ -125,7 +125,7 @@ resource "google_cloud_run_service" "default" {
           initial_delay_seconds = 15
 
           tcp_socket {
-            port = 8200
+            port = 8080
           }
         }
 

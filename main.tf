@@ -104,6 +104,17 @@ resource "google_cloud_run_service" "default" {
           value = var.vault_api_addr
         }
 
+        startup_probe {
+          period_seconds        = 240
+          timeout_seconds       = 240
+          failure_threshold     = 3
+          initial_delay_seconds = 15
+
+          tcp_socket {
+            port = 8080
+          }
+        }
+
         resources {
           limits = {
             cpu    = "1000m"

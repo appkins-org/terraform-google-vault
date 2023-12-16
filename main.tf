@@ -1,30 +1,31 @@
 locals {
   vault_config = jsonencode(
     {
-      "storage" = {
-        "gcs" = {
-          "bucket"     = local.vault_storage_bucket_name
-          "ha_enabled" = "false"
+      plugin_directory = "/vault/plugins"
+      storage = {
+        gcs = {
+          bucket     = local.vault_storage_bucket_name
+          ha_enabled = "false"
         }
-      },
-      "seal" = {
-        "gcpckms" = {
-          "project"    = var.project,
-          "region"     = var.location,
-          "key_ring"   = local.vault_kms_keyring_name,
-          "crypto_key" = google_kms_crypto_key.vault.name
+      }
+      seal = {
+        gcpckms = {
+          project    = var.project,
+          region     = var.location,
+          key_ring   = local.vault_kms_keyring_name,
+          crypto_key = google_kms_crypto_key.vault.name
         }
-      },
-      "default_lease_ttl" = "168h",
-      "max_lease_ttl"     = "720h",
-      "disable_mlock"     = "true",
-      "listener" = {
-        "tcp" = {
-          "address"     = "0.0.0.0:8080",
-          "tls_disable" = "1"
+      }
+      default_lease_ttl = "168h",
+      max_lease_ttl     = "720h",
+      disable_mlock     = "true",
+      listener = {
+        tcp = {
+          address     = "0.0.0.0:8080",
+          tls_disable = "1"
         }
-      },
-      "ui" = var.vault_ui
+      }
+      ui = var.vault_ui
     }
   )
   vault_kms_keyring_name    = var.vault_kms_keyring_name != "" ? var.vault_kms_keyring_name : "${var.name}-${lower(random_id.vault.hex)}-kr"
@@ -96,7 +97,7 @@ resource "google_cloud_run_service" "default" {
         "autoscaling.knative.dev/maxScale"        = 1 # HA not Supported
         "run.googleapis.com/vpc-access-connector" = var.vpc_connector != "" ? var.vpc_connector : null
         # Hardcoded here after a change in the Cloud Run API response
-        "run.googleapis.com/sandbox" = "gvisor"
+        # "run.googleapis.com/sandbox" = "gvisor"
       }
     }
     spec {
@@ -122,13 +123,47 @@ resource "google_cloud_run_service" "default" {
           name  = "VAULT_API_ADDR"
           value = var.vault_api_addr
         }
+
         resources {
           limits = {
-            "cpu"    = "1000m"
-            "memory" = "256Mi"
+            cpu    = "1000m"
+            memory = "256Mi"
           }
           requests = {}
         }
+
+        volume_mounts {
+          name       = "plugins"
+          mount_path = "/vault/plugins"
+        }
+      }
+
+      containers {
+        name  = "plugin-downloader"
+        image = "alpine"
+
+        command = [
+          "/bin/sh",
+          "-c"
+        ]
+
+        args = [
+          join(" && ", [
+            "wget https://github.com/1Password/vault-plugin-secrets-onepassword/releases/download/v1.1.0/vault-plugin-secrets-onepassword_1.1.0_darwin_amd64.zip -O /tmp/vault.zip",
+            "unzip -d /tmp /tmp/vault.zip",
+            "mv /tmp/vault-plugin-secrets-onepassword_v1.1.0 /vault/plugins/onepassword",
+            "chmod +x /vault/plugins/onepassword"
+          ])
+        ]
+
+        volume_mounts {
+          name       = "plugins"
+          mount_path = "/vault/plugins"
+        }
+      }
+
+      volumes {
+        name = "plugins"
       }
     }
   }

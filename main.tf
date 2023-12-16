@@ -164,6 +164,11 @@ resource "google_cloud_run_service" "default" {
 
       volumes {
         name = "plugins"
+
+        empty_dir {
+          medium     = "Memory"
+          size_limit = "128Mi"
+        }
       }
     }
   }

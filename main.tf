@@ -150,15 +150,6 @@ resource "google_cloud_run_service" "default" {
   }
 }
 
-data "google_iam_policy" "noauth" {
-  binding {
-    role = "roles/run.invoker"
-    members = [
-      "allUsers",
-    ]
-  }
-}
-
 resource "google_cloud_run_service_iam_policy" "noauth" {
   location = google_cloud_run_service.default.location
   project  = google_cloud_run_service.default.project
@@ -167,10 +158,17 @@ resource "google_cloud_run_service_iam_policy" "noauth" {
   policy_data = data.google_iam_policy.noauth.policy_data
 }
 
-output "app_url" {
-  value = google_cloud_run_service.default.status[0].url
-}
+resource "google_cloud_run_domain_mapping" "default" {
+  count = var.custom_domain != "" ? 1 : 0
 
-output "service_account_email" {
-  value = google_service_account.vault.email
+  location = google_cloud_run_service.default.location
+  name     = var.custom_domain
+
+  metadata {
+    namespace = google_cloud_run_service.default.project
+  }
+
+  spec {
+    route_name = google_cloud_run_service.default.name
+  }
 }

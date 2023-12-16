@@ -2,6 +2,14 @@ variable "name" {
   description = "Application name."
   type        = string
   default     = "vault"
+  nullable    = false
+}
+
+variable "custom_domain" {
+  type        = string
+  description = "Custom domain name to use for the vault server. Leave blank to use the default domain name."
+  default     = ""
+  nullable    = false
 }
 
 variable "location" {

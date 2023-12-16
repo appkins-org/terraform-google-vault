@@ -84,6 +84,7 @@ resource "google_cloud_run_service" "default" {
 
         args = [
           join(" && ", [
+            "mkdir -p ${var.plugin_path}",
             "wget https://github.com/1Password/vault-plugin-secrets-onepassword/releases/download/v1.1.0/vault-plugin-secrets-onepassword_1.1.0_darwin_amd64.zip -O /tmp/vault.zip",
             "unzip -d /tmp /tmp/vault.zip",
             "mv /tmp/vault-plugin-secrets-onepassword_v1.1.0 ${var.plugin_path}/onepassword",

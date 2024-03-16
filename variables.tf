@@ -32,7 +32,7 @@ variable "vault_image" {
 variable "vault_version" {
   description = "Vault version to use."
   type        = string
-  default     = "1.7.2"
+  default     = "1.15.6"
 }
 
 variable "bucket_force_destroy" {

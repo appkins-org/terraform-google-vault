@@ -106,3 +106,16 @@ variable "plugin_directory" {
   type        = string
   default     = "/usr/local/libexec/vault"
 }
+
+variable "resources" {
+  type = object({
+    limits = optional(object({
+      cpu    = optional(string, "1000m")
+      memory = optional(string, "256Mi")
+    }), {})
+    requests = optional(map(string), {})
+  })
+  description = "Resource limits."
+  default     = {}
+  nullable    = false
+}

@@ -111,7 +111,7 @@ variable "resources" {
   type = object({
     limits = optional(object({
       cpu    = optional(string, "1000m")
-      memory = optional(string, "256Mi")
+      memory = optional(string, "288Mi")
     }), {})
     requests = optional(map(string), {})
   })

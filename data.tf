@@ -12,4 +12,6 @@ data "google_service_account_id_token" "default" {
   target_audience        = google_cloud_run_service.default.status[0].url
   delegates              = []
   include_email          = true
+
+  depends_on = [ google_project_iam_member.auth ]
 }

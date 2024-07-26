@@ -26,13 +26,7 @@ variable "project" {
 variable "vault_image" {
   description = "Vault docker image (i.e. hashicorp/vault."
   type        = string
-  default     = "hashicorp/vault"
-}
-
-variable "vault_version" {
-  description = "Vault version to use."
-  type        = string
-  default     = "1.15.6"
+  default     = "hashicorp/vault:1.15.6"
 }
 
 variable "bucket_force_destroy" {

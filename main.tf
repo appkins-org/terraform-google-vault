@@ -8,6 +8,20 @@ resource "google_service_account" "vault" {
   display_name = "Vault Service Account for KMS auto-unseal"
 }
 
+resource "google_project_iam_member" "auth" {
+  project = google_service_account.vault.project
+
+  role   = "roles/iam.serviceAccountTokenCreator"
+  member = "serviceAccount:${google_service_account.vault.email}"
+}
+
+resource "google_project_iam_member" "invoker" {
+  project = google_service_account.vault.project
+
+  role   = "roles/run.admin"
+  member = "serviceAccount:${google_service_account.vault.email}"
+}
+
 resource "google_storage_bucket" "vault" {
   name          = local.vault_storage_bucket_name
   project       = var.project
@@ -77,7 +91,7 @@ resource "google_cloud_run_service" "default" {
       container_concurrency = var.container_concurrency
       containers {
         # Specifying args seems to require the command / entrypoint
-        image = "${var.vault_image}:${var.vault_version}"
+        image = var.vault_image
 
         command = [
           "/bin/sh",

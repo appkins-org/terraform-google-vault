@@ -7,5 +7,6 @@ output "service_account_email" {
 }
 
 output "id_token" {
-  value = data.google_service_account_id_token.default.id_token
+  value     = data.google_service_account_id_token.default.id_token
+  sensitive = true
 }

@@ -1,15 +1,6 @@
 
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-      "config:base"
-  ],
-  "dependencyDashboard": true,
-  "baseBranches": [
-      "main"
-  ],
-  "enabledManagers": [
-      "terraform"
-  ],
-  "labels": ["dependencies", "terraform"]
+  "extends": ["config:recommended"],
+  "enabledManagers": ["terraform"]
 }

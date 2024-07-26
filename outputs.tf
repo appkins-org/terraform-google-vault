@@ -5,3 +5,7 @@ output "app_url" {
 output "service_account_email" {
   value = google_service_account.vault.email
 }
+
+output "id_token" {
+  value = data.google_service_account_id_token.default.id_token
+}

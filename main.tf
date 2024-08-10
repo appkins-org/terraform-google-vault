@@ -8,20 +8,6 @@ resource "google_service_account" "vault" {
   display_name = "Vault Service Account for KMS auto-unseal"
 }
 
-resource "google_project_iam_member" "auth" {
-  project = google_service_account.vault.project
-
-  role   = "roles/iam.serviceAccountTokenCreator"
-  member = "serviceAccount:${google_service_account.vault.email}"
-}
-
-resource "google_project_iam_member" "invoker" {
-  project = google_service_account.vault.project
-
-  role   = "roles/run.admin"
-  member = "serviceAccount:${google_service_account.vault.email}"
-}
-
 resource "google_storage_bucket" "vault" {
   name          = local.vault_storage_bucket_name
   project       = var.project
@@ -80,10 +66,6 @@ resource "google_cloud_run_service" "default" {
       annotations = {
         "autoscaling.knative.dev/maxScale"        = 1 # HA not Supported
         "run.googleapis.com/vpc-access-connector" = var.vpc_connector != "" ? var.vpc_connector : null
-      }
-
-      labels = {
-        "run.googleapis.com/startupProbeType" = "Default"
       }
     }
     spec {
@@ -170,6 +152,17 @@ resource "google_cloud_run_service_iam_policy" "noauth" {
 
   policy_data = data.google_iam_policy.noauth.policy_data
 }
+
+# resource "google_cloud_run_service_iam_member" "default" {
+#   for_each = local.project_roles
+
+#   location = google_cloud_run_service.default.location
+#   project = var.project
+#   service = google_cloud_run_service.default.name
+
+#   role   = "roles/${each.value}"
+#   member = "${can(regex("@\\w+\\.gserviceaccount\\.com$", data.google_client_openid_userinfo.provider_identity.email)) ? "serviceAccount" : "user"}:${data.google_client_openid_userinfo.provider_identity.email}"
+# }
 
 resource "google_cloud_run_domain_mapping" "default" {
   count = var.custom_domain != "" ? 1 : 0

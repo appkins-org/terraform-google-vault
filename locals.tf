@@ -30,4 +30,9 @@ locals {
   )
   vault_kms_keyring_name    = var.vault_kms_keyring_name != "" ? var.vault_kms_keyring_name : "${var.name}-${lower(random_id.vault.hex)}-kr"
   vault_storage_bucket_name = var.vault_storage_bucket_name != "" ? var.vault_storage_bucket_name : "${var.name}-${lower(random_id.vault.hex)}-bucket"
+
+  project_roles = toset([
+    // "iam.serviceAccountTokenCreator",
+    "run.admin"
+  ])
 }

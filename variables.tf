@@ -1,8 +1,13 @@
-variable "name" {
-  description = "Application name."
-  type        = string
-  default     = "vault"
-  nullable    = false
+variable "bucket_force_destroy" {
+  description = "CAUTION: Set force_destroy for Storage Bucket. This is where the vault data is stored. Setting this to true will allow terraform destroy to delete the bucket."
+  type        = bool
+  default     = false
+}
+
+variable "container_concurrency" {
+  description = "Max number of connections per container instance."
+  type        = number
+  default     = 80 # Max per Cloud Run Documentation
 }
 
 variable "custom_domain" {
@@ -18,39 +23,35 @@ variable "location" {
   default     = "us-central1"
 }
 
+variable "name" {
+  description = "Application name."
+  type        = string
+  default     = "vault"
+  nullable    = false
+}
+
+variable "plugin_directory" {
+  description = "Path to the plugin directory. This is where the vault plugins are stored."
+  type        = string
+  default     = "/usr/local/libexec/vault"
+}
+
 variable "project" {
   description = "Google project ID."
   type        = string
 }
 
-variable "vault_image" {
-  description = "Vault docker image (i.e. hashicorp/vault."
-  type        = string
-  default     = "hashicorp/vault:1.17.2"
-}
-
-variable "bucket_force_destroy" {
-  description = "CAUTION: Set force_destroy for Storage Bucket. This is where the vault data is stored. Setting this to true will allow terraform destroy to delete the bucket."
-  type        = bool
-  default     = false
-}
-
-variable "container_concurrency" {
-  description = "Max number of connections per container instance."
-  type        = number
-  default     = 80 # Max per Cloud Run Documentation
-}
-
-variable "vpc_connector" {
-  description = "Serverless VPC access connector."
-  type        = string
-  default     = ""
-}
-
-variable "vault_ui" {
-  description = "Enable Vault UI."
-  type        = bool
-  default     = false
+variable "resources" {
+  type = object({
+    limits = optional(object({
+      cpu    = optional(string, "1000m")
+      memory = optional(string, "288Mi")
+    }), {})
+    requests = optional(map(string), {})
+  })
+  description = "Resource limits."
+  default     = {}
+  nullable    = false
 }
 
 variable "vault_api_addr" {
@@ -59,16 +60,10 @@ variable "vault_api_addr" {
   default     = ""
 }
 
-variable "vault_kms_keyring_name" {
-  description = "Name of the Google KMS keyring to use."
+variable "vault_image" {
+  description = "Vault docker image (i.e. hashicorp/vault."
   type        = string
-  default     = ""
-}
-
-variable "vault_kms_key_rotation" {
-  description = "The period for KMS key rotation."
-  type        = string
-  default     = "2592000s"
+  default     = "hashicorp/vault:1.17.2"
 }
 
 variable "vault_kms_key_algorithm" {
@@ -83,6 +78,18 @@ variable "vault_kms_key_protection_level" {
   default     = "SOFTWARE"
 }
 
+variable "vault_kms_key_rotation" {
+  description = "The period for KMS key rotation."
+  type        = string
+  default     = "2592000s"
+}
+
+variable "vault_kms_keyring_name" {
+  description = "Name of the Google KMS keyring to use."
+  type        = string
+  default     = ""
+}
+
 variable "vault_service_account_id" {
   description = "ID for the service account to be used. This is the part of the service account email before the `@` symbol."
   type        = string
@@ -95,21 +102,14 @@ variable "vault_storage_bucket_name" {
   default     = ""
 }
 
-variable "plugin_directory" {
-  description = "Path to the plugin directory. This is where the vault plugins are stored."
-  type        = string
-  default     = "/usr/local/libexec/vault"
+variable "vault_ui" {
+  description = "Enable Vault UI."
+  type        = bool
+  default     = false
 }
 
-variable "resources" {
-  type = object({
-    limits = optional(object({
-      cpu    = optional(string, "1000m")
-      memory = optional(string, "288Mi")
-    }), {})
-    requests = optional(map(string), {})
-  })
-  description = "Resource limits."
-  default     = {}
-  nullable    = false
+variable "vpc_connector" {
+  description = "Serverless VPC access connector."
+  type        = string
+  default     = ""
 }
